@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\DB;
 
 use PDO;
-use App\Config;
 
 class DBConnection
 {
@@ -13,12 +12,23 @@ class DBConnection
 
     public function __construct()
     {
-        $host = Config::DB_HOST;
-        $database = Config::DB_NAME;
-        $user = Config::DB_USER;
-        $password = Config::DB_PASS;
+        // Use getenv to retrieve the environment variable from .env file
+        $password = getenv('MYSQL_ROOT_PASSWORD');
 
-        $this->connection = new PDO("mysql:host=$host;dbname=$database", $user, $password);
+        // Since you haven't defined other DB parameters in .env,
+        // we are using default values that match your Docker setup
+        $host = 'mysql-server'; // This should match the service name in docker-compose
+        $database = 'job_board'; // This is the database name you have in your docker-compose
+        $user = 'root'; // Default MySQL user
+
+        // Set the DSN for the PDO connection
+        $dsn = "mysql:host={$host};dbname={$database};charset=utf8mb4";
+
+        // Create the PDO connection
+        $this->connection = new PDO($dsn, $user, $password, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
     }
 
     public function getConnection(): PDO
