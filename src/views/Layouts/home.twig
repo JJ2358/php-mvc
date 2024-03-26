@@ -1,9 +1,18 @@
 {% extends 'base.twig' %}
 
 {% block content %}
-<div class="m-auto w-8/12 md:w-6/12">
-    {% include 'partials/page-message.twig' %}
-
-    <h1 class="text-3xl mb-4">Home</h1>
+<div class="container mx-auto my-8">
+    <h1 class="text-3xl font-bold mb-4">Jobs</h1>
+    {% for job in jobs %}
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold">{{ job.title }}</h2>
+        <p class="text-gray-600">Location: {{ job.location }}</p>
+        <p class="text-gray-600">Start Date: {{ job.start_date|date('F j, Y') }}</p>
+        <p class="text-gray-600">{{ job.description|slice(0, 150) }}...</p>
+        <a href="/jobs/{{ job.id }}" class="text-blue-500 hover:underline">View</a>
+    </div>
+    {% else %}
+    <p>No jobs available at the moment.</p>
+    {% endfor %}
 </div>
 {% endblock %}

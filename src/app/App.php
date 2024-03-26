@@ -12,7 +12,7 @@ class App
 
     public function __construct()
     {
-        session_start();
+        // session_start();
     }
 
     public function addRoute(string $path, string $controller, string $action): void

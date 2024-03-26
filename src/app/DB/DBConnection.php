@@ -14,6 +14,8 @@ class DBConnection
     {
         // Use getenv to retrieve the environment variable from .env file
         $password = getenv('MYSQL_ROOT_PASSWORD');
+        $password = 'secret';  // Temporarily hardcode the password for testing purposes
+
 
         // Since you haven't defined other DB parameters in .env,
         // we are using default values that match your Docker setup

@@ -3,46 +3,57 @@
 namespace App\Models;
 
 use App\DB\DBConnection;
-use PDOException;
+use PDO;
 
 class Job {
-    private $dbConnection;
+    private $pdo;
 
     public function __construct() {
-        $this->dbConnection = (new DBConnection())->getConnection();
+        $this->pdo = (new DBConnection())->getConnection();
     }
 
+    public function getAll(): array {
+        try {
+            $stmt = $this->pdo->query('SELECT * FROM jobs ORDER BY start_date DESC');
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            error_log($e->getMessage());
+            return [];
+        }
+    }
+
+    public function findById(int $id): ?array {
+        try {
+            $stmt = $this->pdo->prepare('SELECT * FROM jobs WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+            $job = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $job ?: null;
+        } catch (\PDOException $e) {
+            // Error handling
+            error_log('PDOException - ' . $e->getMessage(), 0);
+            return null;
+        }
+    }
     public function save(array $jobData): bool {
         try {
-            // Assume 'job_id' is a unique identifier from the API for each job
-            // Check if job already exists to prevent duplicates
-            $existsQuery = "SELECT COUNT(*) FROM jobs WHERE job_id = :job_id";
-            $stmt = $this->dbConnection->prepare($existsQuery);
-            $stmt->execute([':job_id' => $jobData['job_id']]);
-
-            if ($stmt->fetchColumn() > 0) {
-                return false;
-            }
-
-            // Insert new job
-            $sql = "INSERT INTO jobs (job_id, title, description, location, start_date, contact_email) VALUES (:job_id, :title, :description, :location, :start_date, :contact_email)";
-
-            $stmt = $this->dbConnection->prepare($sql);
+            $stmt = $this->pdo->prepare("INSERT INTO jobs (title, description, location, start_date, contact_email) VALUES (:title, :description, :location, :start_date, :contact_email)");
 
             $stmt->execute([
-                ':job_id' => $jobData['job_id'],
                 ':title' => $jobData['title'],
                 ':description' => $jobData['description'],
                 ':location' => $jobData['location'],
-                ':start_date' => $jobData['start_date'],
+                ':start_date' => date('Y-m-d', strtotime($jobData['start_date'])), // Ensuring the date format matches SQL
                 ':contact_email' => $jobData['contact_email'],
             ]);
 
             return true;
-        } catch (PDOException $e) {
-            // Log error or handle it as per your application's error handling policy
+        } catch (\PDOException $e) {
+            // Ideally, log this error
             error_log($e->getMessage());
             return false;
         }
     }
+
+
+    // You can add more methods here for insert, update, delete, etc., as needed.
 }
