@@ -25,6 +25,8 @@ $app->addRoute('/admin/create', AdminController::class, 'createAdminUser');
 $app->addRoute('/login', AdminController::class, 'login');
 $app->addRoute('/admin', AdminController::class, 'adminDashboard');
 $app->addRoute('/logout', AdminController::class, 'logout');
+$app->addRoute('/apply-for-job/{id}', JobController::class, 'applyForJob');
+
 
 
 

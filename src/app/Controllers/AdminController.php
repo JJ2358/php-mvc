@@ -31,7 +31,7 @@ class AdminController extends Controller
         // Render the admin dashboard view with is_admin
         $this->render('admin_dashboard.twig', [
             'flash_message' => $_SESSION['flash_message'] ?? null,
-            'is_admin' => $_SESSION['is_admin'] // Add this line
+            'is_admin' => $_SESSION['is_admin']
         ]);
         unset($_SESSION['flash_message']); // Clear the flash message after displaying
     }

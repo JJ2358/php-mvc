@@ -23,7 +23,12 @@ class JobController extends Controller {
             $job = $jobModel->findById($id);
 
             if ($job) {
-                $this->render('job_detail.twig', ['job' => $job]);
+                // Add the 'is_admin' key to the array passed to the view.
+                $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+                $this->render('job_detail.twig', [
+                    'job' => $job,
+                    'is_admin' => $isAdmin
+                ]);
             } else {
                 throw new \Exception("Job not found"); // Use your custom exception or handle it accordingly
             }
