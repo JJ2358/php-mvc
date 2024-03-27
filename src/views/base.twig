@@ -9,13 +9,19 @@
 </head>
 
 <body class="">
-    <div class="my-4">
-        {% block content %}{% endblock %}
-    </div>
 
-    <script src=" ./assets/dist/main.bundle.js">
-    </script>
+{% if is_admin %}
+    <div class="bg-blue-500 p-4 flex justify-end space-x-4">
+        <a href="/admin" class="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800">Dashboard</a>
+        <a href="/logout" class="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800">Logout</a>
+    </div>
+{% endif %}
+
+<div class="my-4">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="/assets/dist/main.bundle.js"></script>
 
 </body>
-
 </html>

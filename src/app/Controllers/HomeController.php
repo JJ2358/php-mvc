@@ -25,6 +25,7 @@ class HomeController extends Controller {
 
         // Fetch paginated jobs from the database
         $jobs = $jobModel->getJobs($offset, $perPage);
+        $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
 
         $this->render('home.twig', [
             'jobs' => $jobs,
@@ -34,6 +35,7 @@ class HomeController extends Controller {
             'has_next' => $currentPage < $totalPages,
             'previous_page' => $currentPage - 1,
             'next_page' => $currentPage + 1,
+            'is_admin' => $isAdmin,
         ]);
     }
     public function login(): void

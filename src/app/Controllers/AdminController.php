@@ -5,11 +5,13 @@ namespace App\Controllers;
 use App\Models\User;
 use App\DB\DBConnection;
 use PDO;
+use App\Services\JobApiService;
 
 class AdminController extends Controller
 {
     private $pdo;
     private $userModel;
+
 
     public function __construct()
     {
@@ -18,11 +20,47 @@ class AdminController extends Controller
         $this->userModel = new User(); // Initialize the User model
     }
 
+    public function adminDashboard() {
+        // Check if user is an admin and logged in
+        if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
+            $_SESSION['error'] = 'Access denied. Please log in as an admin.';
+            $this->redirect('/login');
+            return;
+        }
+
+        // Render the admin dashboard view
+        $this->render('admin_dashboard.twig', [
+            'flash_message' => $_SESSION['flash_message'] ?? null,
+        ]);
+        unset($_SESSION['flash_message']); // Clear the flash message after displaying
+    }
+
+    public function fetchJobsFromAPI() {
+        // Only allow this action if the user is an admin
+        if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
+            $_SESSION['error'] = 'Access denied. Unauthorized action.';
+            $this->redirect('/login');
+            return;
+        }
+
+        $jobService = new JobApiService();
+        $jobs = $jobService->fetchJobs();
+        if (!empty($jobs)) {
+            $jobService->saveJobsToDatabase($jobs);
+            $_SESSION['flash_message'] = "Jobs successfully fetched from API and saved to database.";
+        } else {
+            $_SESSION['flash_message'] = "Failed to fetch jobs from API or no new jobs available.";
+        }
+
+        $this->redirect('/admin');
+    }
+
+
     public function createAdminUser()
     {
         // Define admin user credentials
         $email = "admin@example.com";
-        $password = "securePassword123"; // Use a strong, secure password in production
+        $password = "1"; // Use a strong, secure password in production
 
         // Initialize the User model and check if an admin already exists
         $userModel = new User();
