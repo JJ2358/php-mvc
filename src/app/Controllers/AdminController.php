@@ -35,26 +35,6 @@ class AdminController extends Controller
         unset($_SESSION['flash_message']); // Clear the flash message after displaying
     }
 
-    public function fetchJobsFromAPI() {
-        // Only allow this action if the user is an admin
-        if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
-            $_SESSION['error'] = 'Access denied. Unauthorized action.';
-            $this->redirect('/login');
-            return;
-        }
-
-        $jobService = new JobApiService();
-        $jobs = $jobService->fetchJobs();
-        if (!empty($jobs)) {
-            $jobService->saveJobsToDatabase($jobs);
-            $_SESSION['flash_message'] = "Jobs successfully fetched from API and saved to database.";
-        } else {
-            $_SESSION['flash_message'] = "Failed to fetch jobs from API or no new jobs available.";
-        }
-
-        $this->redirect('/admin');
-    }
-
 
     public function createAdminUser()
     {

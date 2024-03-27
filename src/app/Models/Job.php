@@ -45,12 +45,7 @@ class Job {
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindParam(':limit', $perPage, PDO::PARAM_INT);
         $stmt->execute();
-        $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Debugging: Remove or comment out for production
-        error_log(print_r($jobs, true));
-
-        return $jobs;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
@@ -66,11 +61,10 @@ class Job {
     }
 
     public function doesJobExist($jobData) {
-        $sql = "SELECT COUNT(*) FROM jobs WHERE title = :title AND description = :description AND location = :location AND start_date = :start_date AND contact_email = :contact_email";
+        $sql = "SELECT COUNT(*) FROM jobs WHERE title = :title AND location = :location AND start_date = :start_date AND contact_email = :contact_email";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':title' => $jobData['title'],
-            ':description' => $jobData['description'],
             ':location' => $jobData['location'],
             ':start_date' => $jobData['start_date'],
             ':contact_email' => $jobData['contact_email']

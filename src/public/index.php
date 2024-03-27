@@ -19,11 +19,12 @@ $app = new App();
 // Add routes
 $app->addRoute('/', HomeController::class, 'index');
 $app->addRoute('/jobs/{id}', JobController::class, 'showJob');
-$app->addRoute('/admin', AdminController::class, 'admin');
 $app->addRoute('/admin/fetch-jobs', AdminController::class, 'fetchJobs');
 $app->addRoute('/setup-admin', AdminController::class, 'setupAdmin');
 $app->addRoute('/admin/create', AdminController::class, 'createAdminUser');
 $app->addRoute('/login', AdminController::class, 'login');
+$app->addRoute('/admin', AdminController::class, 'adminDashboard');
+
 
 
 // Run app

@@ -26,14 +26,18 @@ class JobApiService {
     }
     public function saveJobsToDatabase($jobs) {
         $jobModel = new Job();
+
         foreach ($jobs as $job) {
-            $jobModel->save([
-                'title' => $job['title'],
-                'description' => $job['description'],
-                'location' => $job['location'],
-                'start_date' => $job['start_date'],
-                'contact_email' => $job['contact_email'],
-            ]);
+            // Check if the job already exists in the database
+            if (!$jobModel->doesJobExist($job)) {
+                $jobModel->save([
+                    'title' => $job['title'],
+                    'description' => $job['description'],
+                    'location' => $job['location'],
+                    'start_date' => $job['start_date'],
+                    'contact_email' => $job['contact_email'],
+                ]);
+            }
         }
     }
 }
