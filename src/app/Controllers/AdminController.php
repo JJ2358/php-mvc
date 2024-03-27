@@ -2,103 +2,92 @@
 
 namespace App\Controllers;
 
-use App\Services\AuthService;
-use App\Services\JobApiService;
-use App\Models\UserModel;
-use Exception;
+use App\Models\User;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
-class AdminController extends Controller {
-    private $authService;
-
-    public function __construct() {
-        parent::__construct();
-        $this->authService = new AuthService();
+class AdminController extends Controller
+{
+    public function __construct()
+    {
+        parent::__construct(); // Assuming the parent constructor initializes Twig
     }
 
-    public function login() {
-        if ($this->authService->isLoggedIn()) {
-            header('Location: /admin');
-            exit;
+    public function createAdminUser()
+    {
+        // Only run this if you're sure there's no admin or you're doing it from a secure environment
+        $email = "admin@example.com"; // Replace with the desired admin email
+        $password = "1"; // Replace with a strong password
+
+        // Check if an admin user already exists to prevent creating multiple admin users
+        $existingAdmin = User::findByEmail($email);
+        if ($existingAdmin) {
+            // Admin user already exists, handle this case appropriately, perhaps log the attempt
+            echo "An admin user already exists.";
+            return;
         }
 
+        // Create a new user instance and set the admin flag
+        $user = new User();
+        $user->email = $email;
+        $user->password = password_hash($password, PASSWORD_DEFAULT); // Always hash passwords!
+        $user->is_admin = true; // Ensure your User model supports an 'is_admin' property or similar
+
+        // Attempt to save the new admin user
+        if ($user->createAdmin()) {
+            // Admin user created successfully
+            echo "Admin user created successfully.";
+        } else {
+            // Failed to create admin user, handle this case appropriately
+            echo "Failed to create admin user.";
+        }
+    }
+
+    public function loginForm()
+    {
+        if (isset($_SESSION['user_id'])) {
+            $this->redirect('/admin'); // Already logged in
+        } else {
+            $this->render('login.twig');
+        }
+    }
+
+    public function login()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
-            if ($this->authService->login($email, $password)) {
-                header('Location: /admin');
-                exit;
+            $user = User::findByEmail($email); // Assumes User model has a findByEmail method
+
+            if ($user && password_verify($password, $user->password)) {
+                $_SESSION['user_id'] = $user->id; // Set user session
+                $_SESSION['is_admin'] = $user->is_admin; // Track if user is an admin
+
+                $this->redirect('/admin'); // Redirect to the admin dashboard
             } else {
-                // Handle login failure
-                $this->render('login.twig', ['error' => 'Invalid credentials.']);
-                return;
+                // Login failed, render login form with error
+                $this->render('/login.twig', ['error' => 'Invalid credentials. Please try again.']);
             }
+        } else {
+            $this->loginForm();
         }
-
-        $this->render('login.twig');
     }
 
-    public function admin() {
-        if (!$this->authService->isLoggedIn()) {
-            header('Location: /login');
-            exit;
-        }
+    public function logout()
+    {
+        session_start();
+        unset($_SESSION['user_id']);
+        unset($_SESSION['is_admin']); // Clear admin flag
+        session_destroy(); // Optional: completely destroy the session
 
-        // Render the admin dashboard
-        $this->render('admin.twig');
-    }
-    public function setupAdmin() {
-        $userModel = new UserModel();
-        $userModel->ensureAdminUserExists();
+        $this->redirect('/login'); // Redirect to the login page
     }
 
-    public function fetchJobs() {
-        if (!$this->authService->isLoggedIn()) {
-            header('Location: /login');
-            exit;
-        }
-
-        $jobService = new JobApiService();
-        $jobs = $jobService->fetchJobs();
-        $jobService->saveJobsToDatabase($jobs);
-
-        // Redirect to admin with a success message
-        $_SESSION['message'] = "Jobs successfully fetched from API.";
-        header('Location: /admin');
+    // Helper method for redirects
+    protected function redirect($url)
+    {
+        header('Location: ' . $url);
         exit;
     }
-    public function createAdmin() {
-        try {
-            if (!$this->isAuthenticatedAdmin()) {
-                // If not authenticated as admin, store an error message and redirect to login page
-                $_SESSION['error'] = 'Unauthorized access.';
-                header('Location: /login');
-                exit;
-            }
-
-            $userModel = new UserModel();
-            if ($userModel->ensureAdminUserExists()) {
-                // If the admin user was successfully created, store a success message
-                $_SESSION['message'] = 'Admin user created successfully.';
-            } else {
-                // If the admin user already exists, store a notice message
-                $_SESSION['message'] = 'Admin user already exists.';
-            }
-
-            // Redirect to the admin dashboard with a message
-            header('Location: /admin');
-            exit;
-
-        } catch (Exception $e) {
-            // In case of any exception, store an error message and redirect or display an error page
-            $_SESSION['error'] = 'Failed to create admin user: ' . $e->getMessage();
-            header('Location: /error'); // Assuming you have an error route
-            exit;
-        }
-    }
-    private function isAuthenticatedAdmin() {
-        // Example check: return true if a session variable for admin is set and true
-        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
-    }
-
 }
