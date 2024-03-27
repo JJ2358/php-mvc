@@ -1,0 +1,15 @@
+<nav aria-label="Pagination" class="flex justify-center mt-8">
+    <ul class="flex list-none rounded my-2">
+        {% if current_page > 1 %}
+        <li>
+            <a href="?page={{ current_page - 1 }}" class="px-4 py-2 mr-2 text-gray-700 bg-white rounded border border-gray-300 hover:bg-gray-100 hover:text-blue-500">Previous</a>
+        </li>
+        {% endif %}
+
+        {% if current_page < total_pages %}
+        <li>
+            <a href="?page={{ current_page + 1 }}" class="px-4 py-2 text-gray-700 bg-white rounded border border-gray-300 hover:bg-gray-100 hover:text-blue-500">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>

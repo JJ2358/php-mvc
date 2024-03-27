@@ -16,8 +16,3 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL
     -- Add any additional fields if required by your application logic
 );
-INSERT INTO jobs (title, description, location, start_date, contact_email) VALUES
-('Software Engineer', 'Responsible for developing enterprise-level solutions...', 'New York', '2024-01-01', 'hiring@company.com'),
-('Web Developer', 'Join our dynamic team to build innovative web applications...', 'San Francisco', '2024-02-15', 'apply@webco.com');
-INSERT INTO users (email, password_hash) VALUES
-('admin@example.com', '<hashed_password_here>');
