@@ -25,5 +25,6 @@ $app->addRoute('/setup-admin', AdminController::class, 'setupAdmin');
 $app->addRoute('/admin/create', AdminController::class, 'createAdminUser');
 $app->addRoute('/login', AdminController::class, 'login');
 
+
 // Run app
 $app->run();

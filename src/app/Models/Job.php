@@ -42,10 +42,15 @@ class Job {
     public function getJobs($offset, $perPage) {
         $sql = "SELECT * FROM jobs ORDER BY start_date DESC LIMIT :offset, :limit";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->bindParam(':limit', $perPage, \PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindParam(':limit', $perPage, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Debugging: Remove or comment out for production
+        error_log(print_r($jobs, true));
+
+        return $jobs;
     }
 
 

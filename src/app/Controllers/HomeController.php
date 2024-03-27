@@ -10,12 +10,11 @@ class HomeController extends Controller {
         $jobService = new JobApiService();
         $jobModel = new Job();
 
-        // Optionally, fetch and save jobs from the API if needed.
-        // This could be based on certain conditions, like a daily update, etc.
-        // $jobs = $jobService->fetchJobs();
-        // if (!empty($jobs)) {
-        //     $jobService->saveJobsToDatabase($jobs); // Comment or adjust this line based on your application's needs
-        // }
+        // Fetch and save jobs from the API
+        $jobs = $jobService->fetchJobs();
+        if (!empty($jobs)) {
+            $jobService->saveJobsToDatabase($jobs);
+        }
 
         // Pagination setup
         $perPage = 5; // Jobs per page
@@ -24,8 +23,8 @@ class HomeController extends Controller {
         $totalPages = ceil($totalJobs / $perPage);
         $offset = ($currentPage - 1) * $perPage;
 
-        // Fetch paginated jobs
-        $jobs = $jobModel->getJobs($offset, $perPage); // Use the adjusted method for pagination
+        // Fetch paginated jobs from the database
+        $jobs = $jobModel->getJobs($offset, $perPage);
 
         $this->render('home.twig', [
             'jobs' => $jobs,
