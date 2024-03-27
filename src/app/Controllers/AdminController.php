@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Services\AuthService;
 use App\Services\JobApiService;
+use App\Models\UserModel;
+use Exception;
 
 class AdminController extends Controller {
     private $authService;
@@ -45,6 +47,10 @@ class AdminController extends Controller {
         // Render the admin dashboard
         $this->render('admin.twig');
     }
+    public function setupAdmin() {
+        $userModel = new UserModel();
+        $userModel->ensureAdminUserExists();
+    }
 
     public function fetchJobs() {
         if (!$this->authService->isLoggedIn()) {
@@ -61,4 +67,38 @@ class AdminController extends Controller {
         header('Location: /admin');
         exit;
     }
+    public function createAdmin() {
+        try {
+            if (!$this->isAuthenticatedAdmin()) {
+                // If not authenticated as admin, store an error message and redirect to login page
+                $_SESSION['error'] = 'Unauthorized access.';
+                header('Location: /login');
+                exit;
+            }
+
+            $userModel = new UserModel();
+            if ($userModel->ensureAdminUserExists()) {
+                // If the admin user was successfully created, store a success message
+                $_SESSION['message'] = 'Admin user created successfully.';
+            } else {
+                // If the admin user already exists, store a notice message
+                $_SESSION['message'] = 'Admin user already exists.';
+            }
+
+            // Redirect to the admin dashboard with a message
+            header('Location: /admin');
+            exit;
+
+        } catch (Exception $e) {
+            // In case of any exception, store an error message and redirect or display an error page
+            $_SESSION['error'] = 'Failed to create admin user: ' . $e->getMessage();
+            header('Location: /error'); // Assuming you have an error route
+            exit;
+        }
+    }
+    private function isAuthenticatedAdmin() {
+        // Example check: return true if a session variable for admin is set and true
+        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+    }
+
 }
