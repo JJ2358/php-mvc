@@ -1,26 +1,22 @@
-{# admin_dashboard.twig #}
-
 {% extends 'base.twig' %}
 
 {% block content %}
-    <div class="admin-bar bg-blue-600 text-white p-4 flex justify-end">
-        <a href="/admin" class="mr-4">Dashboard</a>
-        <a href="/logout">Logout</a>
-    </div>
-    <div>
-        <!-- Place the button for fetching jobs here -->
-        <form action="/admin/fetch-jobs" method="post">
-            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Fetch Jobs from API
-            </button>
-        </form>
-    </div>
+    <div class="min-h-screen bg-gray-100 flex items-center justify-center">
 
-    {% if flash_message %}
-        <div class="alert alert-success">
-            {{ flash_message }}
+        <div class="bg-white p-6 rounded shadow-md w-full max-w-xs">
+        <a href="/" class="text-white text-sm hover:text-blue-200">← Homepage</a>
+            <h1 class="text-2xl font-bold mb-4 text-center">Dashboard</h1>
+            <form action="/admin/fetch-jobs" method="post" class="flex flex-col items-center">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    Get Jobs
+                </button>
+            </form>
+            {% if flash_message %}
+                <div class="mt-4 bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3" role="alert">
+                    <p class="font-bold">Informational message</p>
+                    <p class="text-sm">{{ flash_message }}</p>
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
-
-    <!-- Include additional admin content here -->
+    </div>
 {% endblock %}

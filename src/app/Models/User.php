@@ -18,22 +18,19 @@ class User
         $this->pdo = (new DBConnection())->getConnection();
     }
 
-    public function createUser(array $data): bool {
+    public function createUser($userData) {
+        $sql = "INSERT INTO users (email, password_hash, is_admin) VALUES (:email, :password_hash, :is_admin)";
         try {
-            $sql = "INSERT INTO users (email, password_hash) VALUES (:email, :password_hash)";
             $stmt = $this->pdo->prepare($sql);
-
-            // Ensure the password is hashed before saving
-            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-
             $stmt->execute([
-                ':email' => $data['email'],
-                ':password_hash' => $hashedPassword,
+                ':email' => $userData['email'],
+                ':password_hash' => $userData['password_hash'],
+                ':is_admin' => $userData['is_admin']
             ]);
-
             return true;
         } catch (\PDOException $e) {
-            error_log('PDOException - ' . $e->getMessage());
+            // Log the error or handle it as needed
+            error_log($e->getMessage());
             return false;
         }
     }

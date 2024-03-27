@@ -23,7 +23,7 @@ class JobController extends Controller {
             $job = $jobModel->findById($id);
 
             if ($job) {
-                $this->render('job.twig', ['job' => $job]);
+                $this->render('job_detail.twig', ['job' => $job]);
             } else {
                 throw new \Exception("Job not found"); // Use your custom exception or handle it accordingly
             }
