@@ -10,7 +10,6 @@ class User
     public $id;
     public $email;
     public $password;
-    public $is_admin;
 
     private $pdo;
 
@@ -19,21 +18,23 @@ class User
         $this->pdo = (new DBConnection())->getConnection();
     }
 
-    public function createUser(array $data): ?array {
+    public function createUser(array $data): bool {
         try {
             $sql = "INSERT INTO users (email, password_hash) VALUES (:email, :password_hash)";
             $stmt = $this->pdo->prepare($sql);
 
+            // Ensure the password is hashed before saving
+            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+
             $stmt->execute([
                 ':email' => $data['email'],
-                ':password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
+                ':password_hash' => $hashedPassword,
             ]);
 
-            $userId = $this->pdo->lastInsertId();
-            return $this->findById($userId);
+            return true;
         } catch (\PDOException $e) {
             error_log('PDOException - ' . $e->getMessage());
-            return null;
+            return false;
         }
     }
 

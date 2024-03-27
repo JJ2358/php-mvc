@@ -18,22 +18,38 @@ class AdminController extends Controller
         $this->userModel = new User(); // Initialize the User model
     }
 
-    public function createUser(array $data): ?array {
-        try {
-            $sql = "INSERT INTO users (email, password_hash) VALUES (:email, :password_hash)";
-            $stmt = $this->pdo->prepare($sql);
+    public function createAdminUser()
+    {
+        // Define admin user credentials
+        $email = "admin@example.com";
+        $password = "securePassword123"; // Use a strong, secure password in production
 
-            $stmt->execute([
-                ':email' => $data['email'],
-                ':password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
-            ]);
+        // Initialize the User model and check if an admin already exists
+        $userModel = new User();
+        $existingAdmin = $userModel->findByEmail($email);
 
-            $userId = $this->pdo->lastInsertId();
-            return $this->findById($userId);
-        } catch (\PDOException $e) {
-            error_log('PDOException - ' . $e->getMessage());
-            return null;
+        if ($existingAdmin) {
+            // Admin already exists
+            $_SESSION['flash_message'] = "An admin user already exists.";
+            $this->redirect('/login');
+            return;
         }
+
+        // Attempt to create a new admin user
+        $wasCreated = $userModel->createUser([
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        if ($wasCreated) {
+            // Admin creation successful
+            $_SESSION['flash_message'] = "Admin user created successfully.";
+        } else {
+            // Admin creation failed
+            $_SESSION['flash_message'] = "Failed to create admin user.";
+        }
+
+        $this->redirect('/login');
     }
 
     public function loginForm()
@@ -80,7 +96,6 @@ class AdminController extends Controller
     public function logout()
     {
         unset($_SESSION['user_id']);
-        unset($_SESSION['is_admin']);
         session_destroy();
         $this->redirect('/login');
     }
