@@ -6,13 +6,24 @@ use App\Models\User;
 use App\DB\DBConnection;
 use PDO;
 use App\Services\JobApiService;
-
+/**
+ * Handles administrative actions such as managing users and jobs.
+ */
 class AdminController extends Controller
 {
+    /**
+     * @var PDO Instance for database access.
+     */
     private $pdo;
+    /**
+     * @var User Model for user-related database operations.
+     */
     private $userModel;
 
-
+    /**
+     * Initializes the Controller by setting up the database connection
+     * and the User model.
+     */
     public function __construct()
     {
         parent::__construct(); // Assuming the parent constructor initializes Twig
@@ -20,6 +31,9 @@ class AdminController extends Controller
         $this->userModel = new User(); // Initialize the User model
     }
 
+    /**
+     * Displays the admin dashboard, checking for admin permissions.
+     */
     public function adminDashboard() {
         // Check if user is an admin and logged in
         if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
@@ -36,7 +50,9 @@ class AdminController extends Controller
         unset($_SESSION['flash_message']); // Clear the flash message after displaying
     }
 
-
+    /**
+     * Attempts to create an admin user account.
+     */
     public function createAdminUser() {
         $email = "admin@example.com";
         $password = "1"; // Replace with a secure password
@@ -70,7 +86,9 @@ class AdminController extends Controller
         $this->redirect('/login');
     }
 
-
+    /**
+     * Displays the login form or redirects to the admin dashboard if already logged in.
+     */
     public function loginForm()
     {
         if (isset($_SESSION['user_id'])) {
@@ -80,13 +98,20 @@ class AdminController extends Controller
         }
     }
 
-
+    /**
+     * Finds a user by their ID.
+     *
+     * @param int $id User ID to search for.
+     * @return array|null Returns user info if found, otherwise null.
+     */
     public function findById($id): ?array {
         $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = :id');
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
-
+    /**
+     * Handles the login procedure including validation of inputs and credentials.
+     */
     public function login() {
         // Check if the request method is POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -123,6 +148,9 @@ class AdminController extends Controller
             $this->render('login.twig');
         }
     }
+    /**
+     * Logs out the current user and clears the session.
+     */
     public function logout() {
         // Unset all session variables
         $_SESSION = [];
@@ -143,18 +171,30 @@ class AdminController extends Controller
         $this->redirect('/login');
     }
 
-
+    /**
+     * Redirects to the specified URL.
+     *
+     * @param string $url The URL to redirect to.
+     */
     protected function redirect($url)
     {
         header('Location: ' . $url);
         exit;
     }
+    /**
+     * Sets a flash message and redirects to the specified path.
+     *
+     * @param string $message The message to set.
+     * @param string $redirectPath The path to redirect to.
+     */
     protected function flashAndRedirect($message, $redirectPath)
     {
         $_SESSION['flash_message'] = $message;
         $this->redirect($redirectPath);
     }
-
+    /**
+     * Fetches jobs from an external API and saves them to the database.
+     */
     public function fetchAndSaveJobs() {
         if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
             $_SESSION['error'] = 'Access denied. Unauthorized action.';

@@ -5,8 +5,18 @@ namespace App\Controllers;
 use App\Models\Job;
 use App\Services\JobApiService;
 
+/**
+ * HomeController handles the display of the homepage and job listings.
+ */
 class HomeController extends Controller {
-    public function index() {
+    /**
+     * Displays the homepage with job listings.
+     *
+     * Fetches jobs from an external API, saves them to the database,
+     * and then retrieves a paginated list of jobs to display on the homepage.
+     * Also determines if the current user is an admin for conditional display logic.
+     */
+    public function index(): void {
         $jobService = new JobApiService();
         $jobModel = new Job();
 
@@ -38,8 +48,11 @@ class HomeController extends Controller {
             'is_admin' => $isAdmin,
         ]);
     }
-    public function login(): void
-    {
+
+    /**
+     * Renders the login page.
+     */
+    public function login(): void {
         $this->render('login.twig');
     }
 }

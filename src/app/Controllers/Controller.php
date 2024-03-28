@@ -8,16 +8,34 @@ use Twig\Environment;
 use Twig\TwigFunction;
 use Twig\Loader\FilesystemLoader;
 
+/**
+ * Base controller class that initializes Twig environment and provides
+ * common functionalities to child controllers.
+ */
 class Controller
 {
+    /**
+     * @var FilesystemLoader Twig loader for locating the templates.
+     */
     protected $loader;
+
+    /**
+     * @var Environment Twig environment for rendering templates.
+     */
     protected $twig;
 
+    /**
+     * Controller constructor initializes Twig and adds global functions.
+     */
     public function __construct()
     {
         $this->init();
     }
 
+    /**
+     * Initializes the Twig environment and loader with configurations.
+     * Also, calls the method to add global functions to Twig.
+     */
     private function init(): void
     {
         $this->loader = new FilesystemLoader(VIEWS_PATH);
@@ -29,28 +47,27 @@ class Controller
     }
 
     /**
-     * @param string @layout
-     * @param array @data
+     * Renders a Twig template with optional data.
+     *
+     * Merges provided data with default data and renders the specified
+     * Twig layout.
+     *
+     * @param string $layout The Twig layout file to render.
+     * @param array $data Optional data to pass to the Twig template.
      */
     public function render(string $layout, array $data = []): void
     {
-        $twig = $this->twig;
-
-        $data = array_merge(
-            $data,
-            [
-                'controller' => $this,
-            ]
-        );
-
-        echo $twig->render(
+        echo $this->twig->render(
             "Layouts/$layout",
-            $data,
+            array_merge($data, ['controller' => $this])
         );
     }
 
     /**
-     * register global functions to twig
+     * Registers global functions in the Twig environment.
+     *
+     * This method adds application-specific functions that can be used
+     * globally within any Twig template.
      */
     protected function addGlobalFunctions(): void
     {
@@ -61,7 +78,7 @@ class Controller
         ];
 
         foreach ($functions as $function) {
-            $this->twig->addFunction(new TwigFunction($function, $function));
+            $this->twig->addFunction(new TwigFunction($function, [$this, $function]));
         }
     }
 }

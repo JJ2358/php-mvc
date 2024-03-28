@@ -3,8 +3,18 @@
 namespace App\Controllers;
 
 use App\Models\Job;
-
+/**
+ * Handles job-related actions such as listing and showing job details.
+ */
 class JobController extends Controller {
+
+    /**
+     * Lists jobs available.
+     *
+     * This method fetches all jobs and renders them on the home page.
+     * It implements basic error handling by rendering an error message
+     * if the fetching process fails.
+     */
     public function listJobs(): void {
         try {
             $jobModel = new Job();
@@ -21,7 +31,11 @@ class JobController extends Controller {
             $this->render('error.twig', ['errorMessage' => 'Error fetching job listings.']);
         }
     }
-
+    /**
+     * Shows the details of a specific job.
+     *
+     * @param int $id The ID of the job to display.
+     */
     public function showJob(int $id): void {
         $jobModel = new Job();
         $job = $jobModel->findById($id);
@@ -45,7 +59,14 @@ class JobController extends Controller {
             $this->render('404.twig', ['message' => 'The job you are looking for does not exist.']);
         }
     }
-
+    /**
+     * Handles the application process for a job.
+     *
+     * Validates user input and, if valid, sends an application email.
+     * Displays a success message upon successful application.
+     *
+     * @param mixed $id The ID of the job being applied for.
+     */
     public function applyForJob($id) {
         $jobModel = new Job();
 
@@ -139,12 +160,14 @@ class JobController extends Controller {
         }
     }
 
-
+    /**
+     * Redirects to a specified URL.
+     *
+     * @param string $url The URL to redirect to.
+     */
     protected function redirect($url) {
         header('Location: ' . $url);
         exit;
     }
 
-
-    // Add any additional methods you may need
 }
