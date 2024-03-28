@@ -25,9 +25,15 @@ class JobController extends Controller {
             if ($job) {
                 // Add the 'is_admin' key to the array passed to the view.
                 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+                $flashMessage = '';
+                if (isset($_SESSION['flash_message'])) {
+                    $flashMessage = $_SESSION['flash_message'];
+                    unset($_SESSION['flash_message']); // Don't forget to clear the message after displaying it
+                }
                 $this->render('job_detail.twig', [
                     'job' => $job,
-                    'is_admin' => $isAdmin
+                    'is_admin' => $isAdmin,
+                    'flash_message' => $flashMessage
                 ]);
             } else {
                 throw new \Exception("Job not found"); // Use your custom exception or handle it accordingly
@@ -40,10 +46,10 @@ class JobController extends Controller {
     }
 
     public function applyForJob($id) {
-        $jobModel = new Job(); // Initialize this outside so it's available throughout the method
+        $jobModel = new Job();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Input validation and file checks
+            // Validate name and email fields
             $name = trim($_POST['name'] ?? '');
             $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
             $resume = $_FILES['resume'] ?? null;
@@ -74,24 +80,37 @@ class JobController extends Controller {
 
             // If there are no errors, proceed with file upload and email
             if (empty($errors)) {
-                $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/uploads'; // Absolute path to the upload directory
-                $uniqueName = uniqid('resume_', true) . '.' . $fileExt; // Create a unique file name
+                $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/uploads';
+                $uniqueName = uniqid('resume_', true) . '.' . $fileExt;
                 $resumePath = $uploadPath . '/' . $uniqueName;
 
                 if (move_uploaded_file($resume['tmp_name'], $resumePath)) {
                     $job = $jobModel->findById($id);
+
                     if ($job) {
                         // Set up the email
                         $to = $job['contact_email'];
                         $subject = "Job Application for {$job['title']}";
                         $resumeLink = "http://{$_SERVER['HTTP_HOST']}/uploads/$uniqueName"; // Adjust with actual URL
-                        $message = "Applicant Name: $name\nApplicant Email: $email\nResume Link: $resumeLink";
-                        $headers = "From: $email\r\nReply-To: $email\r\nX-Mailer: PHP/" . phpversion();
+
+                        // Construct the HTML message
+                        $message = "<html><body>";
+                        $message .= "<p>You received an application from PHP Job Board</p>";
+                        $message .= "<p>Job Title: {$job['title']}</p>";
+                        $message .= "<p>Applicant Name: {$name}</p>";
+                        $message .= "<p>Applicant Email: {$email}</p>";
+                        $message .= "<p>Applicant Resume: <a href='{$resumeLink}'>Download Resume</a></p>";
+                        $message .= "</body></html>";
+
+                        // Headers for HTML email
+                        $headers = "MIME-Version: 1.0\r\n";
+                        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+                        $headers .= "From: {$email}\r\n";
+                        $headers .= "Reply-To: {$email}\r\n";
+                        $headers .= "X-Mailer: PHP/" . phpversion();
 
                         if (mail($to, $subject, $message, $headers)) {
-                            $_SESSION['flash_message'] = 'Application sent successfully.';
-                            $this->redirect("/jobs/$id");
-                            return;
+                            $_SESSION['flash_message'] = 'Application sent successfully. We will contact you soon!';
                         } else {
                             $errors['mail'] = 'Unable to send application email.';
                         }
@@ -108,7 +127,7 @@ class JobController extends Controller {
             return;
         }
 
-        // Render the form with errors or a success message
+        // Render the form with errors or success message
         if (!empty($errors)) {
             $this->render('job_detail.twig', [
                 'job' => $jobModel->findById($id),
@@ -118,6 +137,7 @@ class JobController extends Controller {
             $this->redirect("/jobs/$id");
         }
     }
+
 
     protected function redirect($url) {
         header('Location: ' . $url);

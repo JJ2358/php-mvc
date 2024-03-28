@@ -4,7 +4,7 @@
 <div class="min-h-screen bg-gray-100 py-10">
     <div class="container mx-auto px-4 lg:px-20 xl:px-40 2xl:px-80">
         <div class="mb-4 text-blue-500">
-            <a href="/jobs" class="hover:text-blue-600">← View All Jobs</a>
+            <a href="/" class="hover:text-blue-600">← View All Jobs</a>
         </div>
 
         <div class="bg-white p-12 shadow rounded-lg">
@@ -37,9 +37,12 @@
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                         Apply for this job
                     </button>
-                    {% for error in errors %}
-                        <div class="error">{{ error }}</div>
-                    {% endfor %}
+                    {% if flash_message %}
+                    <div class="alert alert-success">
+                        {{ flash_message }}
+                    </div>
+                    {% set flash_message = null %} {# Clear the message after displaying it #}
+                    {% endif %}
                 </form>
             </div>
         </div>
