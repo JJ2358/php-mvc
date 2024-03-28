@@ -23,30 +23,26 @@ class JobController extends Controller {
     }
 
     public function showJob(int $id): void {
-        try {
-            $jobModel = new Job();
-            $job = $jobModel->findById($id);
+        $jobModel = new Job();
+        $job = $jobModel->findById($id);
 
-            if ($job) {
-                // Add the 'is_admin' key to the array passed to the view.
-                $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
-                $flashMessage = '';
-                if (isset($_SESSION['flash_message'])) {
-                    $flashMessage = $_SESSION['flash_message'];
-                    unset($_SESSION['flash_message']); // Don't forget to clear the message after displaying it
-                }
-                $this->render('job_detail.twig', [
-                    'job' => $job,
-                    'is_admin' => $isAdmin,
-                    'flash_message' => $flashMessage
-                ]);
-            } else {
-                throw new \Exception("Job not found"); // Use your custom exception or handle it accordingly
+        if ($job) {
+            $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+            $flashMessage = '';
+            if (isset($_SESSION['flash_message'])) {
+                $flashMessage = $_SESSION['flash_message'];
+                unset($_SESSION['flash_message']); // Clear the message after displaying
             }
-        } catch (\Exception $e) {
-            // Log the exception and render a not found or error page
-            error_log($e->getMessage());
-            $this->render('not_found.twig', ['errorMessage' => 'Job not found.']);
+            // Render the job detail page
+            $this->render('job_detail.twig', [
+                'job' => $job,
+                'is_admin' => $isAdmin,
+                'flash_message' => $flashMessage
+            ]);
+        } else {
+            // Job not found, set HTTP status to 404 and render a user-friendly 404 page
+            http_response_code(404);
+            $this->render('404.twig', ['message' => 'The job you are looking for does not exist.']);
         }
     }
 
