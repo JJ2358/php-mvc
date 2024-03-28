@@ -113,7 +113,7 @@ class JobController extends Controller {
                         // Set up the email
                         $to = $job['contact_email'];
                         $subject = "Job Application for {$job['title']}";
-                        $resumeLink = "http://{$_SERVER['HTTP_HOST']}/uploads/$uniqueName"; // Adjust with actual URL
+                        $resumeLink = "http://{$_SERVER['HTTP_HOST']}/uploads/$uniqueName";
 
                         // Construct the HTML message
                         $message = "<html><body>";
