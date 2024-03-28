@@ -9,7 +9,12 @@ class JobController extends Controller {
         try {
             $jobModel = new Job();
             $jobs = $jobModel->getAll();
-            $this->render('home.twig', ['jobs' => $jobs]);
+
+            // Check if jobs are available and pass a flag to the view
+            $this->render('home.twig', [
+                'jobs' => $jobs,
+                'jobs_available' => !empty($jobs) // true if jobs are available, false otherwise
+            ]);
         } catch (\Exception $e) {
             // Log the exception and render an error page or output an error message
             error_log($e->getMessage());
